@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <!-- MOBILE: no zoom, no scale, full viewport -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0,
+        maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="description" content="Cannon Siege — 3D artillery simulator. Destroy forts with realistic ballistics on desktop and mobile." />
+  <!-- PWA / mobile web app tags -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#0A0D0F" />
+  <title>Cannon Siege | 3D Artillery Simulator</title>
+  <link rel="stylesheet" href="index.css" />
+</head>
+<body>
+
+  <!-- ══ PORTRAIT WARNING ════════════════════════════════════ -->
+  <div id="portrait-warn">
+    <div class="portrait-inner">
+      <div class="portrait-icon">📱</div>
+      <p>Rotate device to<br><strong>landscape</strong><br>for best experience</p>
+    </div>
+  </div>
+
+  <!-- ══ 3D CANVAS ══════════════════════════════════════════ -->
+  <div id="game-container">
+    <canvas id="game-canvas"></canvas>
+  </div>
+
+  <!-- ══ MAIN MENU ══════════════════════════════════════════ -->
+  <div id="main-menu">
+    <div class="menu-content">
+
+      <div class="menu-logo">
+        <div class="logo-cannon">💣</div>
+        <h1 class="logo-title">CANNON<span class="logo-accent">SIEGE</span></h1>
+        <p class="logo-sub">3D Artillery Simulator</p>
+      </div>
+
+      <div class="menu-stats-bar">
+        <div class="stat-item"><span class="stat-label">Engine</span><span class="stat-val">Three.js</span></div>
+        <div class="stat-item"><span class="stat-label">Physics</span><span class="stat-val">Ballistic</span></div>
+        <div class="stat-item"><span class="stat-label">Levels</span><span class="stat-val">5</span></div>
+        <div class="stat-item"><span class="stat-label">Mode</span><span class="stat-val">Campaign</span></div>
+      </div>
+
+      <!-- Difficulty Selector -->
+      <div class="menu-section">
+        <div class="section-title">Select Difficulty</div>
+        <div class="diff-row">
+          <button id="diff-easy" class="diff-btn diff-easy">
+            <span class="diff-icon">🌿</span>
+            <span class="diff-label">EASY</span>
+            <span class="diff-desc">Small forts · Calm wind</span>
+          </button>
+          <button id="diff-medium" class="diff-btn diff-medium diff-active">
+            <span class="diff-icon">⚔️</span>
+            <span class="diff-label">MEDIUM</span>
+            <span class="diff-desc">Castles · Moderate wind</span>
+          </button>
+          <button id="diff-hard" class="diff-btn diff-hard">
+            <span class="diff-icon">💀</span>
+            <span class="diff-label">HARD</span>
+            <span class="diff-desc">Fortresses · Brutal wind</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Sensitivity Slider -->
+      <div class="menu-section">
+        <div class="section-title">Aim Sensitivity &nbsp;
+          <span id="sensitivity-label" class="sens-label">1.0x</span>
+        </div>
+        <div class="slider-row">
+          <span class="slider-cap">SLOW</span>
+          <input type="range" id="sensitivity-slider"
+                 min="0.3" max="3.0" step="0.1" value="1.0"
+                 class="sens-slider" />
+          <span class="slider-cap">FAST</span>
+        </div>
+      </div>
+
+      <!-- Buttons -->
+      <div class="menu-buttons">
+        <button id="btn-play" class="btn-primary">
+          <span class="btn-icon">🎯</span>
+          <span>Launch Campaign</span>
+        </button>
+        <button id="btn-howto" class="btn-secondary"><span>📖 Controls</span></button>
+        <button id="btn-mute"  class="btn-secondary"><span>🔊 Sound</span></button>
+      </div>
+
+      <!-- How-to -->
+      <div id="howto-panel" class="menu-controls">
+        <h3>Controls</h3>
+        <div class="controls-grid">
+          <div class="ctrl-item ctrl-heading">🎯 Aim (Desktop)</div>
+          <div class="ctrl-item ctrl-heading">🚶 Move (Desktop)</div>
+          <div class="ctrl-item"><kbd>← →</kbd> <span>Rotate cannon</span></div>
+          <div class="ctrl-item"><kbd>W S</kbd> <span>Forward / back</span></div>
+          <div class="ctrl-item"><kbd>↑ ↓</kbd> <span>Elevation</span></div>
+          <div class="ctrl-item"><kbd>A D</kbd> <span>Strafe left / right</span></div>
+          <div class="ctrl-item"><kbd>SPACE</kbd> <span>Hold → charge, release → fire</span></div>
+          <div class="ctrl-item ctrl-heading mobile-note">📱 Mobile: use on-screen pads below</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══ HUD ════════════════════════════════════════════════ -->
+  <div id="hud" style="display:none">
+
+    <!-- Top bar -->
+    <div class="hud-top">
+      <div class="hud-panel hud-level">
+        <div id="level-display">LEVEL 1</div>
+        <div id="diff-badge" class="diff-badge">MEDIUM</div>
+      </div>
+      <div class="hud-panel hud-score">
+        <div class="score-label">SCORE</div>
+        <div id="score-value">0</div>
+      </div>
+      <div class="hud-panel hud-ammo">
+        <div class="ammo-label">AMMO</div>
+        <div id="ammo-value">14</div>
+        <div class="ammo-icon">💣</div>
+      </div>
+    </div>
+
+    <!-- Side panels (desktop only) -->
+    <div class="hud-sides">
+
+      <!-- Left: Targeting + Wind -->
+      <div class="hud-left">
+        <div class="hud-panel targeting-panel">
+          <div class="panel-title">Targeting</div>
+          <div class="target-row">
+            <span class="target-label">ELEV</span>
+            <span id="elevation-value" class="target-val">18.3°</span>
+          </div>
+          <div class="target-row">
+            <span class="target-label">AZIM</span>
+            <span id="azimuth-value" class="target-val">0.0°</span>
+          </div>
+          <div class="target-row">
+            <span class="target-label">HITS</span>
+            <span id="hit-counter" class="target-val">0/0</span>
+          </div>
+          <div class="target-row">
+            <span class="target-label">POS</span>
+            <span id="cannon-pos" class="target-val" style="font-size:0.7rem">0, 0</span>
+          </div>
+        </div>
+        <div class="hud-panel wind-panel">
+          <div class="panel-title">Wind</div>
+          <div class="wind-compass">
+            <div class="compass-ring">
+              <span class="compass-n">N</span>
+              <span class="compass-e">E</span>
+              <span class="compass-s">S</span>
+              <span class="compass-w">W</span>
+              <div id="wind-arrow">↑</div>
+            </div>
+          </div>
+          <div id="wind-value">0.0 m/s</div>
+        </div>
+      </div>
+
+      <!-- Right: Power meter (desktop) -->
+      <div class="hud-right desktop-only">
+        <div class="hud-panel power-panel">
+          <div class="panel-title">Power</div>
+          <div class="power-meter">
+            <div class="power-track">
+              <div id="power-fill"></div>
+              <div class="power-markers">
+                <span>MAX</span><span>75%</span><span>50%</span><span>25%</span><span>MIN</span>
+              </div>
+            </div>
+          </div>
+          <div class="power-tip">Hold SPACE</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Status + Combo overlays -->
+    <div id="status-msg"></div>
+    <div id="combo-display"></div>
+
+    <!-- Reload bar -->
+    <div id="reload-bar" style="display:none">
+      <div class="reload-label">Reloading…</div>
+      <div class="reload-track"><div id="reload-fill"></div></div>
+    </div>
+
+    <!-- Hidden placeholders -->
+    <div id="accuracy-display" style="display:none"></div>
+
+    <!-- ══ MOBILE CONTROLS ══════════════════════════════════ -->
+    <div id="mobile-controls" class="mobile-controls" aria-label="Game controls">
+
+      <!-- LEFT ZONE: MOVE D-pad -->
+      <div class="ctrl-zone ctrl-zone-left">
+        <div class="zone-label">MOVE</div>
+        <div class="dpad">
+          <button id="ctrl-fwd"  class="dpad-btn move-btn" aria-label="Move forward">▲</button>
+          <div class="dpad-row">
+            <button id="ctrl-slft" class="dpad-btn move-btn" aria-label="Strafe left">◄</button>
+            <div class="dpad-center move-center">M</div>
+            <button id="ctrl-srgt" class="dpad-btn move-btn" aria-label="Strafe right">►</button>
+          </div>
+          <button id="ctrl-bwd"  class="dpad-btn move-btn" aria-label="Move back">▼</button>
+        </div>
+      </div>
+
+      <!-- CENTER ZONE: Power + Fire -->
+      <div class="ctrl-zone ctrl-zone-center">
+        <!-- Mini power bar above fire button -->
+        <div class="mob-power-wrap">
+          <div class="mob-power-track">
+            <div id="mob-power-fill" class="mob-power-fill"></div>
+          </div>
+          <span class="mob-power-label">PWR</span>
+        </div>
+        <button id="ctrl-fire" class="fire-btn-mob" aria-label="Hold to charge, release to fire">
+          <span class="fire-emoji">🎯</span>
+          <span class="fire-text">FIRE</span>
+          <span class="fire-hint">HOLD &amp; RELEASE</span>
+        </button>
+      </div>
+
+      <!-- RIGHT ZONE: AIM D-pad -->
+      <div class="ctrl-zone ctrl-zone-right">
+        <div class="zone-label aim-label">AIM</div>
+        <div class="dpad">
+          <button id="ctrl-aim-up"    class="dpad-btn aim-btn" aria-label="Aim up">▲</button>
+          <div class="dpad-row">
+            <button id="ctrl-aim-left"  class="dpad-btn aim-btn" aria-label="Aim left">◄</button>
+            <div class="dpad-center aim-center">A</div>
+            <button id="ctrl-aim-right" class="dpad-btn aim-btn" aria-label="Aim right">►</button>
+          </div>
+          <button id="ctrl-aim-down"  class="dpad-btn aim-btn" aria-label="Aim down">▼</button>
+        </div>
+      </div>
+
+    </div><!-- /#mobile-controls -->
+
+  </div><!-- /#hud -->
+
+  <!-- ══ SCRIPTS ════════════════════════════════════════════ -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="audio.js"></script>
+  <script src="physics.js"></script>
+  <script src="ui.js"></script>
+  <script src="effects.js"></script>
+  <script src="targets.js"></script>
+  <script src="cannon.js"></script>
+  <script src="game.js"></script>
+
+</body>
+</html>
