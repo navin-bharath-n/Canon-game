@@ -988,8 +988,8 @@
     switch (e.key) {
       case 'w': case 'W': moveInp.forward = true; break;
       case 's': case 'S': moveInp.back    = true; break;
-      case 'a': case 'A': moveInp.left    = true; break;
-      case 'd': case 'D': moveInp.right   = true; break;
+      case 'a': case 'A': moveInp.right   = true; break;
+      case 'd': case 'D': moveInp.left    = true; break;
     }
 
     if (e.key === ' ') {
@@ -1015,8 +1015,8 @@
     switch (e.key) {
       case 'w': case 'W': moveInp.forward = false; break;
       case 's': case 'S': moveInp.back    = false; break;
-      case 'a': case 'A': moveInp.left    = false; break;
-      case 'd': case 'D': moveInp.right   = false; break;
+      case 'a': case 'A': moveInp.right   = false; break;
+      case 'd': case 'D': moveInp.left    = false; break;
     }
 
     if (e.key === ' ' && state === GS.CHARGING) fire();

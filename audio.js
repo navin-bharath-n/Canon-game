@@ -7,18 +7,24 @@ const AudioEngine = (() => {
   let muted = false;
 
   function init() {
-    try {
-      ctx = new (window.AudioContext || window.webkitAudioContext)();
-      masterGain = ctx.createGain();
-      masterGain.gain.value = 0.55;
-      masterGain.connect(ctx.destination);
-    } catch (e) {
-      console.warn('Web Audio API not available:', e);
-    }
+    // Don't create AudioContext here — browsers block it before a user gesture.
+    // It will be created lazily on the first resume() call (triggered by user input).
   }
 
   function resume() {
-    if (ctx && ctx.state === 'suspended') ctx.resume();
+    // Lazily create context on first user gesture
+    if (!ctx) {
+      try {
+        ctx = new (window.AudioContext || window.webkitAudioContext)();
+        masterGain = ctx.createGain();
+        masterGain.gain.value = muted ? 0 : 0.55;
+        masterGain.connect(ctx.destination);
+      } catch (e) {
+        console.warn('Web Audio API not available:', e);
+        return;
+      }
+    }
+    if (ctx.state === 'suspended') ctx.resume();
   }
 
   function setMuted(m) {
