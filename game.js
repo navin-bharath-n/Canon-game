@@ -506,9 +506,8 @@
     TargetSystem.init(scene);
     CannonController.init(scene);
 
+    // Build lighting immediately (cheap)
     buildLighting();
-    buildTerrain();
-    buildBackground();
 
     UIManager.showMenu();
 
@@ -536,6 +535,12 @@
 
     setupMobileControls();
     animate();
+
+    // Defer heavy world-building so the menu paints first (improves INP)
+    setTimeout(() => {
+      buildTerrain();
+      buildBackground();
+    }, 0);
   }
 
   // ─────────────────────────────────────────
@@ -725,21 +730,28 @@
       lvl.wind.z + (Math.random() - 0.5) * diffCfg.extraWind
     );
 
-    TargetSystem.loadLevel(lvl, diffCfg.hitRadius);
-
     UIManager.updateScore(score, ammo);
-    UIManager.updateHitCounter(0, TargetSystem.getTotalBlocks());
     UIManager.updateWind(windVector);
     UIManager.updateLevel(idx + 1);
     UIManager.updateDifficulty(currentDifficulty, diffCfg.color);
     UIManager.showStatus(`⚔ LEVEL ${idx + 1}: ${lvl.name}  [${currentDifficulty}]`, 3000);
     UIManager.showReloadBar(false);
     UIManager.updatePower(0);
-    CannonController.setTrajectoryVisible(true);
+    CannonController.setTrajectoryVisible(false);
 
     camMode = 'cannon';
     power   = MIN_POWER;
-    state   = GS.PLAYING;
+    state   = GS.RELOADING; // hold in reloading until towers are spawned
+    reloadTime = reloadDur;  // skip reload bar countdown
+
+    // Defer tower creation so the button click response paints first (fixes INP)
+    setTimeout(() => {
+      TargetSystem.loadLevel(lvl, diffCfg.hitRadius);
+      UIManager.updateHitCounter(0, TargetSystem.getTotalBlocks());
+      CannonController.setTrajectoryVisible(true);
+      power = MIN_POWER;
+      state = GS.PLAYING;
+    }, 0);
   }
 
   function fire() {
