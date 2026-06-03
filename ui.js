@@ -15,8 +15,13 @@ const UIManager = (() => {
     ];
     ids.forEach(id => { el[id] = document.getElementById(id); });
 
-    // Prevent accidental page scroll / zoom during touch gameplay
-    document.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
+    // Prevent accidental page scroll / zoom during gameplay only
+    // (allow touchmove on main-menu so it can scroll on mobile)
+    document.addEventListener('touchmove', e => {
+      const menu = document.getElementById('main-menu');
+      if (menu && menu.style.display !== 'none' && menu.contains(e.target)) return;
+      e.preventDefault();
+    }, { passive: false });
     document.addEventListener('gesturestart', e => e.preventDefault(), { passive: false });
     document.addEventListener('contextmenu', e => e.preventDefault());
   }

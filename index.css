@@ -124,12 +124,15 @@ html, body {
   inset: 0;
   z-index: 100;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   background: linear-gradient(160deg,rgba(5,10,8,.97) 0%,rgba(10,20,14,.94) 100%);
   backdrop-filter: blur(4px);
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   padding: 16px;
+  /* allow scrolling even when touch-action:none is set globally */
+  touch-action: pan-y;
 }
 #main-menu::before {
   content: '';
@@ -153,6 +156,9 @@ html, body {
   border: 1px solid rgba(61,255,122,.28);
   border-radius: 12px;
   box-shadow: 0 0 60px rgba(0,0,0,.8),inset 0 1px 0 rgba(61,255,122,.12);
+  /* ensure content can grow and be scrolled */
+  flex-shrink: 0;
+  margin: auto;
 }
 
 /* ─── Logo ──────────────────────────────── */
@@ -431,7 +437,7 @@ kbd { font-family:var(--font-hud); font-size:.6rem; background:rgba(61,255,122,.
   right: 0;
   height: 150px;
   display: none; /* shown via media query / JS */
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
   padding: 8px 10px calc(8px + var(--safe-b));
   padding-left:  calc(10px + var(--safe-l));
@@ -450,15 +456,15 @@ kbd { font-family:var(--font-hud); font-size:.6rem; background:rgba(61,255,122,.
   gap: 4px;
 }
 .ctrl-zone-left  { align-items: flex-start; }
-.ctrl-zone-right { align-items: flex-end; }
-.ctrl-zone-center {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
+/* Right zone: AIM d-pad stacked above the fire button */
+.ctrl-zone-right {
   align-items: center;
-  justify-content: flex-end;
-  gap: 6px;
+  flex-direction: row;
+  gap: 10px;
+  align-items: flex-end;
 }
+/* Center zone hidden — fire button moved to right */
+.ctrl-zone-center { display: none; }
 
 .zone-label {
   font-family: var(--font-hud);
@@ -521,13 +527,21 @@ kbd { font-family:var(--font-hud); font-size:.6rem; background:rgba(61,255,122,.
   box-shadow: 0 0 12px rgba(255,184,51,.45);
 }
 
+/* ── Fire + power wrapper on the right side ─ */
+.fire-side-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
 /* ── Mobile power bar (above fire btn) ───── */
 .mob-power-wrap {
   display: flex;
   align-items: center;
   gap: 6px;
   width: 100%;
-  max-width: 110px;
+  max-width: 90px;
 }
 .mob-power-track {
   flex: 1;

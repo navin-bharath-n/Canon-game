@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cosmic Memory — Space Card Match Game</title>
+  <meta name="description" content="A stunning space-themed memory card matching game with cosmic animations, power-ups, and an immersive nebula atmosphere." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="memory.css" />
+</head>
+<body>
+  <!-- Starfield Canvas -->
+  <canvas id="starfield" aria-hidden="true"></canvas>
+
+  <!-- Nebula orbs (CSS animated) -->
+  <div class="nebula-orb orb-1" aria-hidden="true"></div>
+  <div class="nebula-orb orb-2" aria-hidden="true"></div>
+  <div class="nebula-orb orb-3" aria-hidden="true"></div>
+
+  <!-- Particle burst container -->
+  <div id="particle-container" aria-hidden="true"></div>
+
+  <!-- ===== MAIN APP ===== -->
+  <div id="app">
+
+    <!-- ===== MENU SCREEN ===== -->
+    <section id="screen-menu" class="screen active" aria-label="Main Menu">
+      <div class="menu-content">
+        <div class="logo-group">
+          <div class="logo-icon">🌌</div>
+          <h1 class="logo-title">COSMIC<br/><span>MEMORY</span></h1>
+          <p class="logo-subtitle">Match the Stars. Master the Universe.</p>
+        </div>
+
+        <div class="menu-cards-preview" aria-hidden="true">
+          <div class="preview-card flipped">🪐</div>
+          <div class="preview-card">🌟</div>
+          <div class="preview-card flipped">🚀</div>
+          <div class="preview-card">☄️</div>
+        </div>
+
+        <div class="menu-options">
+          <button id="btn-play" class="btn btn-primary" aria-label="Start New Game">
+            <span class="btn-icon">🚀</span> LAUNCH GAME
+          </button>
+          <button id="btn-how" class="btn btn-secondary" aria-label="How to Play">
+            <span class="btn-icon">📡</span> HOW TO PLAY
+          </button>
+          <button id="btn-leaderboard" class="btn btn-secondary" aria-label="View Leaderboard">
+            <span class="btn-icon">🏆</span> LEADERBOARD
+          </button>
+        </div>
+
+        <div class="difficulty-selector" role="group" aria-label="Select Difficulty">
+          <span class="diff-label">DIFFICULTY</span>
+          <div class="diff-buttons">
+            <button class="diff-btn active" data-diff="easy" id="diff-easy">EASY</button>
+            <button class="diff-btn" data-diff="medium" id="diff-medium">MEDIUM</button>
+            <button class="diff-btn" data-diff="hard" id="diff-hard">HARD</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== HOW TO PLAY SCREEN ===== -->
+    <section id="screen-how" class="screen" aria-label="How to Play">
+      <div class="modal-box">
+        <h2 class="modal-title">📡 HOW TO PLAY</h2>
+        <ul class="how-list">
+          <li><span class="how-icon">👆</span> <strong>Click any card</strong> to flip it and reveal the cosmic symbol.</li>
+          <li><span class="how-icon">🔍</span> <strong>Flip a second card</strong> — if they match, they stay revealed!</li>
+          <li><span class="how-icon">⏱️</span> <strong>Race the clock</strong> — match all pairs before time runs out.</li>
+          <li><span class="how-icon">🔥</span> <strong>Build combos</strong> — consecutive matches multiply your score!</li>
+          <li><span class="how-icon">⚡</span> <strong>Power-ups</strong> appear randomly — grab them for bonuses!</li>
+          <li><span class="how-icon">🏆</span> <strong>Beat your best</strong> — score is saved locally.</li>
+        </ul>
+        <div class="symbol-legend">
+          <span>🪐</span><span>⭐</span><span>🚀</span><span>☄️</span><span>🌙</span><span>👽</span><span>🛸</span><span>🌠</span><span>💫</span><span>🔭</span>
+        </div>
+        <button id="btn-how-back" class="btn btn-primary">← BACK TO MENU</button>
+      </div>
+    </section>
+
+    <!-- ===== LEADERBOARD SCREEN ===== -->
+    <section id="screen-leaderboard" class="screen" aria-label="Leaderboard">
+      <div class="modal-box">
+        <h2 class="modal-title">🏆 LEADERBOARD</h2>
+        <div id="leaderboard-list" class="leaderboard-list">
+          <!-- Populated by JS -->
+        </div>
+        <button id="btn-lb-back" class="btn btn-primary">← BACK TO MENU</button>
+        <button id="btn-lb-clear" class="btn btn-danger">🗑️ CLEAR</button>
+      </div>
+    </section>
+
+    <!-- ===== GAME SCREEN ===== -->
+    <section id="screen-game" class="screen" aria-label="Game Board">
+      <!-- HUD -->
+      <div id="hud" role="status" aria-live="polite">
+        <div class="hud-cell" id="hud-score-wrap">
+          <span class="hud-label">SCORE</span>
+          <span class="hud-value" id="hud-score">0</span>
+        </div>
+        <div class="hud-cell center-hud">
+          <div id="timer-ring" aria-label="Time remaining">
+            <svg viewBox="0 0 80 80" width="80" height="80">
+              <circle class="ring-bg" cx="40" cy="40" r="34"/>
+              <circle class="ring-fill" id="ring-fill" cx="40" cy="40" r="34"/>
+            </svg>
+            <span id="hud-time">60</span>
+          </div>
+        </div>
+        <div class="hud-cell" id="hud-right">
+          <span class="hud-label">COMBO</span>
+          <span class="hud-value" id="hud-combo">x1</span>
+          <span class="hud-label" style="margin-top:0.4rem">PAIRS</span>
+          <span class="hud-value" id="hud-pairs">0/8</span>
+        </div>
+      </div>
+
+      <!-- Combo Flash -->
+      <div id="combo-flash" aria-live="assertive"></div>
+
+      <!-- Power-up tray -->
+      <div id="powerup-tray" aria-label="Active power-ups"></div>
+
+      <!-- Card Grid -->
+      <main id="card-grid" role="grid" aria-label="Memory card grid">
+        <!-- Populated by JS -->
+      </main>
+
+      <!-- Controls -->
+      <div id="game-controls">
+        <button id="btn-pause" class="btn btn-sm" aria-label="Pause Game">⏸ PAUSE</button>
+        <button id="btn-quit" class="btn btn-sm btn-danger" aria-label="Quit to Menu">✕ QUIT</button>
+      </div>
+    </section>
+
+    <!-- ===== PAUSE SCREEN ===== -->
+    <section id="screen-pause" class="screen" aria-label="Game Paused">
+      <div class="modal-box">
+        <h2 class="modal-title">⏸ PAUSED</h2>
+        <p class="modal-text">The cosmos awaits your return, Commander.</p>
+        <button id="btn-resume" class="btn btn-primary">▶ RESUME</button>
+        <button id="btn-restart" class="btn btn-secondary">↺ RESTART</button>
+        <button id="btn-pause-menu" class="btn btn-secondary">🏠 MAIN MENU</button>
+      </div>
+    </section>
+
+    <!-- ===== GAME OVER SCREEN ===== -->
+    <section id="screen-over" class="screen" aria-label="Game Over">
+      <div class="modal-box over-box">
+        <div id="over-icon" class="over-icon">💥</div>
+        <h2 class="modal-title" id="over-title">MISSION FAILED</h2>
+        <p class="modal-text" id="over-msg">The stars remain uncharted…</p>
+        <div class="result-stats">
+          <div class="stat-item">
+            <span class="stat-label">SCORE</span>
+            <span class="stat-val" id="res-score">0</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">PAIRS</span>
+            <span class="stat-val" id="res-pairs">0</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">BEST COMBO</span>
+            <span class="stat-val" id="res-combo">x1</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">BEST SCORE</span>
+            <span class="stat-val" id="res-best">0</span>
+          </div>
+        </div>
+        <div id="name-entry" class="name-entry">
+          <label for="player-name" class="hud-label">ENTER YOUR NAME</label>
+          <input type="text" id="player-name" maxlength="12" placeholder="Commander..." autocomplete="off" />
+        </div>
+        <button id="btn-save-score" class="btn btn-primary">💾 SAVE SCORE</button>
+        <button id="btn-play-again" class="btn btn-secondary">↺ PLAY AGAIN</button>
+        <button id="btn-over-menu" class="btn btn-secondary">🏠 MAIN MENU</button>
+      </div>
+    </section>
+
+  </div><!-- /#app -->
+
+  <script src="memory.js"></script>
+</body>
+</html>

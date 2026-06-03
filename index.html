@@ -217,35 +217,39 @@
         </div>
       </div>
 
-      <!-- CENTER ZONE: Power + Fire -->
-      <div class="ctrl-zone ctrl-zone-center">
-        <!-- Mini power bar above fire button -->
-        <div class="mob-power-wrap">
-          <div class="mob-power-track">
-            <div id="mob-power-fill" class="mob-power-fill"></div>
-          </div>
-          <span class="mob-power-label">PWR</span>
-        </div>
-        <button id="ctrl-fire" class="fire-btn-mob" aria-label="Hold to charge, release to fire">
-          <span class="fire-emoji">🎯</span>
-          <span class="fire-text">FIRE</span>
-          <span class="fire-hint">HOLD &amp; RELEASE</span>
-        </button>
-      </div>
-
-      <!-- RIGHT ZONE: AIM D-pad -->
+      <!-- RIGHT ZONE: AIM D-pad + FIRE button -->
       <div class="ctrl-zone ctrl-zone-right">
-        <div class="zone-label aim-label">AIM</div>
-        <div class="dpad">
-          <button id="ctrl-aim-up"    class="dpad-btn aim-btn" aria-label="Aim up">▲</button>
-          <div class="dpad-row">
-            <button id="ctrl-aim-left"  class="dpad-btn aim-btn" aria-label="Aim left">◄</button>
-            <div class="dpad-center aim-center">A</div>
-            <button id="ctrl-aim-right" class="dpad-btn aim-btn" aria-label="Aim right">►</button>
+
+        <!-- AIM D-pad -->
+        <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+          <div class="zone-label aim-label">AIM</div>
+          <div class="dpad">
+            <button id="ctrl-aim-up"    class="dpad-btn aim-btn" aria-label="Aim up">▲</button>
+            <div class="dpad-row">
+              <button id="ctrl-aim-left"  class="dpad-btn aim-btn" aria-label="Aim left">◄</button>
+              <div class="dpad-center aim-center">A</div>
+              <button id="ctrl-aim-right" class="dpad-btn aim-btn" aria-label="Aim right">►</button>
+            </div>
+            <button id="ctrl-aim-down"  class="dpad-btn aim-btn" aria-label="Aim down">▼</button>
           </div>
-          <button id="ctrl-aim-down"  class="dpad-btn aim-btn" aria-label="Aim down">▼</button>
         </div>
-      </div>
+
+        <!-- FIRE button + Power bar -->
+        <div class="fire-side-wrap">
+          <div class="mob-power-wrap">
+            <div class="mob-power-track">
+              <div id="mob-power-fill" class="mob-power-fill"></div>
+            </div>
+            <span class="mob-power-label">PWR</span>
+          </div>
+          <button id="ctrl-fire" class="fire-btn-mob" aria-label="Hold to charge, release to fire">
+            <span class="fire-emoji">🎯</span>
+            <span class="fire-text">FIRE</span>
+            <span class="fire-hint">HOLD &amp; RELEASE</span>
+          </button>
+        </div>
+
+      </div><!-- /.ctrl-zone-right -->
 
     </div><!-- /#mobile-controls -->
 
